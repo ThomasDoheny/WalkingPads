@@ -1,6 +1,8 @@
 #Lines starting with # are used for commenting
 #Blank lines are also ignored
 
+#.mlcf : metal layer config file
+
 #File Format:
 
 #<Layer Number> start from 0

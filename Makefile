@@ -3,10 +3,10 @@
 # path and flag options
 
 #Super LU
-SuperLUroot	= $(HOME)/Runjie/Temp/SuperLU_4.3
-SUPERLULIB 	= $(SuperLUroot)/lib/libsuperlu_4.3.a
+# SuperLUroot	= $(HOME)/Runjie/Temp/SuperLU_4.3
+SUPERLULIB 	= -lsuperlu
 BLASLIB    	= -lblas
-SLU_HEADER  = $(SuperLUroot)/SRC
+SLU_HEADER  = /usr/include/superlu
 
 INCDIR		= $(SLU_HEADER)
 LIBDIR		= 
