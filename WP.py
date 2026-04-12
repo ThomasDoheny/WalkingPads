@@ -81,6 +81,73 @@ def find_neighbors_IR(x, y, IR): #grid is 73 by 73
         top = IR[(x, y+1)]
     return { "left":left,"right":right, "top":top, "bottom":bottom } 
 
+# def neighbor_helper(x, y):
+#     if x == 1:
+#         left = 1
+#     elif x == 0:
+#         left = 0
+#     else:
+#         left = 2
+
+#     if x == 71:
+#         right = 1
+#     elif x == 72:
+#         right = 0
+#     else:
+#         right = 2
+
+#     if y == 1:
+#         bottom = 1
+#     elif y == 0:
+#         bottom = 0
+#     else: 
+#         bottom = 2
+    
+#     if y == 71:
+#         top = 1
+#     elif y == 72:
+#         top = 0
+#     else:
+#         top = 2
+#     return { "left":left,"right":right, "top":top, "bottom":bottom } 
+
+# def find_two_neighbors_IR(x, y, IR): 
+#     center = IR[(x, y)]
+#     if x == 1:
+#         left_IR = IR[(x-1, y)]
+#     elif x == 0:
+#         left_IR = center
+#     else:
+#         left_IR = (IR[(x-1, y)] + IR[(x-2, y)]) / 2
+
+#     if x == 71:
+#         right_IR = IR[(x+1, y)]
+#     elif x == 72:
+#         right_IR = center
+#     else: 
+#         right_IR = (IR[(x+1, y)] + IR[(x+1, y)]) / 2
+
+#     if y == 1:
+#         bottom_IR = IR[(x, y-1)]
+#     elif y == 0:
+#         bottom_IR = center
+#     else:
+#         bottom_IR = (IR[(x, y-1)] + IR[(x, y-2)]) / 2
+
+#     if y == 71:
+#         top_IR = IR[(x, y+1)]
+#     elif y == 72:
+#         top_IR = center
+#     else: 
+#         top_IR = (IR[(x, y+1)] + IR[(x, y+2)]) / 2
+
+#     return { "left":left_IR,"right":right_IR, "top":top_IR, "bottom":bottom_IR } 
+    
+        
+
+
+    
+
 def compute_forces(data):
     force_x = data["right"] - data["left"]
     force_y = data["top"] - data["bottom"]
@@ -127,8 +194,8 @@ def snap_to_legal_site(candidate, legal_sites, gnd, accepted_vdd, remaining_old_
 
 
 
-sim_length = 300
-D = 60 #update each iteration
+sim_length = 1000
+D = 100 #update each iteration
 freeze_rate = 0.99
 legal_sites = read_legal_padfile("example.vgrid.padloc")
 for i in range(sim_length):
@@ -169,6 +236,8 @@ for i in range(sim_length):
     write_padfile("pads.vgrid.padloc", new_v_pads, g_pads)
     print(f"D: {D}")
     D = D*freeze_rate
+    if moved == 0:
+        break
     # if D < 1:
     #     break
 
