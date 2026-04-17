@@ -59,7 +59,7 @@ def run_voltspot():
         "-p", "example.ptrace",
         "-c", "pdn.config",
         "-gridvol_file", "steady.gridIR"
-    ])
+    ], cwd="voltspot")
 
 def find_neighbors_IR(x, y, IR): #grid is 73 by 73
     center = IR[(x, y)]
@@ -197,13 +197,13 @@ def snap_to_legal_site(candidate, legal_sites, gnd, accepted_vdd, remaining_old_
 sim_length = 1000
 D = 100 #update each iteration
 freeze_rate = 0.99
-legal_sites = read_legal_padfile("example.vgrid.padloc")
+legal_sites = read_legal_padfile("voltspot/example.vgrid.padloc")
 for i in range(sim_length):
     run_voltspot()
-    grid = read_grid_ir("steady.gridIR") #use this as input to find_neighbors_IR
+    grid = read_grid_ir("voltspot/steady.gridIR") #use this as input to find_neighbors_IR
     hotspot = get_hotspot(grid)
     print(f"Iteration {i}, worst IR: {hotspot}")
-    v_pads, g_pads = read_padfile("pads.vgrid.padloc")
+    v_pads, g_pads = read_padfile("voltspot/pads.vgrid.padloc")
     new_v_pads = []
     moved = 0
     for j in range(len(v_pads)):
@@ -233,12 +233,10 @@ for i in range(sim_length):
                 moved += 1
             
     print(f"Moved pads: {moved}")
-    write_padfile("pads.vgrid.padloc", new_v_pads, g_pads)
+    write_padfile("voltspot/pads.vgrid.padloc", new_v_pads, g_pads)
     print(f"D: {D}")
     D = D*freeze_rate
     if moved == 0:
         break
     # if D < 1:
     #     break
-
-
