@@ -1,0 +1,13 @@
+services:
+  walkingpads:
+    container_name: walkingpads
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    volumes:
+      - ../WalkingPads:/WalkingPads
+    stdin_open: true
+    tty: true
+    environment:
+      - DISPLAY=host.docker.internal:0.0
+      - LIBGL_ALWAYS_INDIRECT=0
