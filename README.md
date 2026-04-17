@@ -6,6 +6,7 @@
 
 ```bash
 sudo apt install libsuperlu-dev libblas-dev liblapack-dev perl imagemagick
+pip install numpy --break-system-packages
 ```
 
 ### Build VoltSpot
@@ -38,20 +39,28 @@ cd ..
 display baseline.gif &
 ```
 
-### 3. Run Walking Pads (WP-F)
+### 3. Run an algorithm
 
+**Walking Pads (WP-F):**
 ```bash
 python3 WP.py
 ```
 
-### 4. Visualize WP result
+**Simulated Annealing (SA):**
+```bash
+python3 SA.py
+```
+
+> Both algorithms use `seed=42` in `generator.py`, so re-running `generator.py` and copying the result before each algorithm gives a fair comparison from the same starting placement.
+
+### 4. Visualize result
 
 ```bash
 cd voltspot
 perl plot_onchipIR.pl steady.gridIR
-mv steady.gif ../wp_result.gif
+mv steady.gif ../result.gif
 cd ..
-display wp_result.gif &
+display result.gif &
 ```
 
 ## Scripts
@@ -59,3 +68,4 @@ display wp_result.gif &
 - `generator.py` — generates a random starting pad placement into `voltspot/new_pads.vgrid.padloc`
 - `WP.py` — Walking Pads freezing algorithm
 - `WPN.py` — WIP
+- `SA.py` — Simulated Annealing optimizer
