@@ -20,32 +20,38 @@ cd ..
 
 ## Usage
 
-### Run VoltSpot directly
-
-```bash
-cd voltspot
-./voltspot -f example.flp -p example.ptrace -c pdn.config -gridvol_file steady.gridIR
-cd ..
-```
-
-### Generate a random pad placement
+### 1. Generate a random pad placement
 
 ```bash
 python3 generator.py
 cp voltspot/new_pads.vgrid.padloc voltspot/pads.vgrid.padloc
 ```
 
-### Run Walking Pads (WP-F)
+### 2. Visualize the random baseline
+
+```bash
+cd voltspot
+./voltspot -f example.flp -p example.ptrace -c pdn.config -gridvol_file baseline.gridIR
+perl plot_onchipIR.pl baseline.gridIR
+mv baseline.gif ../baseline.gif
+cd ..
+display baseline.gif &
+```
+
+### 3. Run Walking Pads (WP-F)
 
 ```bash
 python3 WP.py
 ```
 
-### Visualize results
+### 4. Visualize WP result
 
 ```bash
-perl voltspot/plot_onchipIR.pl voltspot/steady.gridIR
-display voltspot/steady.gif &
+cd voltspot
+perl plot_onchipIR.pl steady.gridIR
+mv steady.gif ../wp_result.gif
+cd ..
+display wp_result.gif &
 ```
 
 ## Scripts
