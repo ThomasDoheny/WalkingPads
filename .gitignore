@@ -1,0 +1,18 @@
+# Build artifacts
+voltspot/voltspot
+voltspot/*.o
+voltspot/*.d
+voltspot/*.a
+voltspot/libvoltspot.a
+
+# Runtime outputs
+voltspot/*.gridIR
+voltspot/*.gif
+voltspot/new_pads.vgrid.padloc
+voltspot/pads.vgrid.padloc
+*.padloc
+*.gif
+
+# Python cache
+__pycache__/
+*.pyc
