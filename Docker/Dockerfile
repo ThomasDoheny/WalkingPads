@@ -20,7 +20,7 @@ RUN apt-get update -qq -y && apt-get install -qq -y \
 
 RUN pip install numpy --break-system-packages
 
-RUN git clone https://github.com/ThomasDoheny/WalkingPads.git && \
+RUN git clone https://github.com/ThomasDoheny/WalkingPads.git -b refactor && \
     cd /WalkingPads/voltspot && make clean && make && cd ../.. && rm -rf WalkingPads
 
 CMD ["/bin/bash"]

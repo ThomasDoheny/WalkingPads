@@ -3,9 +3,9 @@ services:
     container_name: walkingpads
     build:
       context: ..
-      dockerfile: Dockerfile
+      dockerfile: Docker/Dockerfile
     volumes:
-      - ../WalkingPads:/WalkingPads
+      - ..:/WalkingPads
     stdin_open: true
     tty: true
     environment:
