@@ -1,4 +1,4 @@
-# WP-N: Walking Pads - Neighbor variant
+# WP-R: Walking Pads - Refined variant
 
 import subprocess
 import math
@@ -9,7 +9,7 @@ def read_padfile(file):
     gnd = []
     with open(file) as f:
         for line in f:
-            if line.startswith("#") or not line.strip():  #line.strip() for empty lines
+            if line.startswith("#") or not line.strip():
                 continue
             t, x, y = line.split()
             if t == "V":
@@ -18,7 +18,7 @@ def read_padfile(file):
                 gnd.append((int(x), int(y)))
     return vdd, gnd
 
-def write_padfile(file, vdd, gnd): #for writing new C4 pad locations after each WP iteration
+def write_padfile(file, vdd, gnd):
     with open(file, "w") as f:
         for x, y in vdd:
             f.write(f"V\t{x}\t{y}\n")
@@ -38,7 +38,6 @@ def read_legal_padfile(file):
                 continue
     return legal_sites
 
-
 def read_grid_ir(file):
     data = {}
     with open(file) as f:
@@ -50,9 +49,8 @@ def read_grid_ir(file):
     return data
 
 def get_hotspot(grid):
-    return max(grid.items(), key = lambda x: x[1])
+    return max(grid.items(), key=lambda x: x[1])
 
-  
 def run_voltspot():
     subprocess.run([
         "./voltspot",
@@ -62,7 +60,7 @@ def run_voltspot():
         "-gridvol_file", "steady.gridIR"
     ], cwd="voltspot")
 
-def find_neighbors_IR(x, y, IR): #grid is 73 by 73
+def find_neighbors_IR(x, y, IR):
     center = IR[(x, y)]
     if (x == 0):
         left = center
@@ -80,24 +78,20 @@ def find_neighbors_IR(x, y, IR): #grid is 73 by 73
         top = center
     else:
         top = IR[(x, y+1)]
-    return { "left":left,"right":right, "top":top, "bottom":bottom } 
+    return {"left": left, "right": right, "top": top, "bottom": bottom}
 
 def compute_forces(data):
     force_x = data["right"] - data["left"]
     force_y = data["top"] - data["bottom"]
-    return {"x":force_x, "y":force_y} # dictionary
-
-
-
+    return {"x": force_x, "y": force_y}
 
 def distance_from_forces(data):
-    # WP-N: move exactly 1 step in the dominant direction only
+    # WP-R uses same 1-step dominant direction as WP-N
     x_force = data["x"]
     y_force = data["y"]
     magnitude = math.hypot(x_force, y_force)
-    if(magnitude < 1e-12):
+    if magnitude < 1e-12:
         return {"x": 0, "y": 0}
-    
     if abs(x_force) > abs(y_force):
         if np.sign(x_force) == -1:
             x_move = -1
@@ -112,8 +106,7 @@ def distance_from_forces(data):
         else:
             x_move = 0
             y_move = 1
-    return {"x":x_move, "y":y_move}
-    
+    return {"x": x_move, "y": y_move}
 
 def not_occupied(site, gnd, accepted_vdd, remaining_old_vdd):
     for g in gnd:
@@ -137,56 +130,66 @@ def snap_to_legal_site(candidate, legal_sites, gnd, accepted_vdd, remaining_old_
             current_site = site
     return current_site
 
-def check_oscillation(history, window=6):
-    # WP-N treats oscillation as convergence per the paper
-    if len(history) < window:
-        return False
-    recent = history[-window:]
-    return recent[0] == recent[2] == recent[4] and recent[1] == recent[3] == recent[5]
+def get_max_ir():
+    grid = read_grid_ir("voltspot/steady.gridIR")
+    return get_hotspot(grid)[1], grid
 
 
 sim_length = 1000
 legal_sites = read_legal_padfile("voltspot/example.vgrid.padloc")
-pad_history = []
 
 for i in range(sim_length):
     run_voltspot()
-    grid = read_grid_ir("voltspot/steady.gridIR") #use this as input to find_neighbors_IR
+    grid = read_grid_ir("voltspot/steady.gridIR")
     hotspot = get_hotspot(grid)
+    max_ir = hotspot[1]
+    hotspot_loc = hotspot[0]
     print(f"Iteration {i}, worst IR: {hotspot}")
+
     v_pads, g_pads = read_padfile("voltspot/pads.vgrid.padloc")
-    new_v_pads = []
-    moved = 0
-    for j in range(len(v_pads)):
-        x_old, y_old = v_pads[j]
-        neighbors = find_neighbors_IR(x_old, y_old, grid) #dictionary data
-        forces = compute_forces(neighbors) #returns x and y forces in dictionary
+
+    # WP-R: sort pads by distance to hotspot, nearest first
+    v_pads_sorted = sorted(v_pads, key=lambda p: math.hypot(p[0]-hotspot_loc[0], p[1]-hotspot_loc[1]))
+
+    improved = False
+    new_v_pads = list(v_pads)  # copy to track accepted moves
+
+    for pad in v_pads_sorted:
+        idx = new_v_pads.index(pad)
+        x_old, y_old = pad
+
+        neighbors = find_neighbors_IR(x_old, y_old, grid)
+        forces = compute_forces(neighbors)
         distances = distance_from_forces(forces)
-        x_pos = x_old + distances["x"]
-        y_pos = y_old + distances["y"]
-        if(x_pos > 72):
-            x_pos = 72
-        if(y_pos > 72):
-            y_pos = 72
-        if(x_pos < 0):
-            x_pos = 0
-        if(y_pos < 0):
-            y_pos = 0
 
+        x_pos = min(72, max(0, x_old + distances["x"]))
+        y_pos = min(72, max(0, y_old + distances["y"]))
         candidate = (x_pos, y_pos)
-        remaining_old = v_pads[j+1:]
-        site = snap_to_legal_site(candidate, legal_sites, g_pads, new_v_pads, remaining_old)
-        if site == None:
-            new_v_pads.append((x_old, y_old))
+
+        occupied_without_current = [p for k, p in enumerate(new_v_pads) if k != idx]
+        site = snap_to_legal_site(candidate, legal_sites, g_pads, occupied_without_current, [])
+
+        if site is None or site == (x_old, y_old):
+            continue
+
+        # tentatively accept move and re-evaluate
+        new_v_pads[idx] = site
+        write_padfile("voltspot/pads.vgrid.padloc", new_v_pads, g_pads)
+        run_voltspot()
+        new_max_ir, grid = get_max_ir()
+
+        if new_max_ir < max_ir:
+            # accept: update hotspot and re-sort next iteration
+            max_ir = new_max_ir
+            hotspot_loc = get_hotspot(grid)[0]
+            improved = True
+            print(f"  Accepted move {(x_old, y_old)} -> {site}, new IR: {max_ir:.6f}")
         else:
-            new_v_pads.append(site)
-            if site != (x_old, y_old):
-                moved += 1
+            # reject: revert
+            new_v_pads[idx] = (x_old, y_old)
+            write_padfile("voltspot/pads.vgrid.padloc", new_v_pads, g_pads)
 
-    print(f"Moved pads: {moved}")
-    write_padfile("voltspot/pads.vgrid.padloc", new_v_pads, g_pads)
-
-    pad_history.append(tuple(new_v_pads))
-    if moved == 0 or check_oscillation(pad_history):
-        print("Converged (no movement or oscillation detected)")
+    print(f"Improved: {improved}")
+    if not improved:
+        print("Converged (no improving move found)")
         break

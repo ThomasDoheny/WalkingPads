@@ -46,6 +46,16 @@ display baseline.gif &
 python3 WP.py
 ```
 
+**Walking Pads (WP-N):**
+```bash
+python3 WPN.py
+```
+
+**Walking Pads (WP-R):**
+```bash
+python3 WPR.py
+```
+
 **Simulated Annealing (SA):**
 ```bash
 python3 SA.py
@@ -66,6 +76,7 @@ display result.gif &
 ## Scripts
 
 - `generator.py` — generates a random starting pad placement into `voltspot/new_pads.vgrid.padloc`
-- `WP.py` — Walking Pads freezing algorithm
-- `WPN.py` — WIP
+- `WP.py` — Walking Pads Freezing algorithm
+- `WPN.py` — Walking Pads Neighbor variant
+- `WPR.py` — Walking Pads Refined variant
 - `SA.py` — Simulated Annealing optimizer

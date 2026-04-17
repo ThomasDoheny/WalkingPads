@@ -1,4 +1,4 @@
-#prototype for WP-F
+# WP-F: Walking Pads - Freezing algorithm
 
 import subprocess
 import math
