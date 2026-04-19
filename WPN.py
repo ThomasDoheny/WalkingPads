@@ -2,7 +2,7 @@
 
 import subprocess
 import math
-import numpy as np
+# import numpy as np
 
 def read_padfile(file):
     vdd = []
@@ -87,6 +87,9 @@ def compute_forces(data):
     force_y = data["top"] - data["bottom"]
     return {"x":force_x, "y":force_y} # dictionary
 
+def sign(x):
+    return -1 if x<0 else 1
+
 
 
 
@@ -99,20 +102,36 @@ def distance_from_forces(data):
         return {"x": 0, "y": 0}
     
     if abs(x_force) > abs(y_force):
-        if np.sign(x_force) == -1:
-            x_move = -1
+        if sign(x_force) == -1:
+            x_move = -8 #8 is the pad pitch
             y_move = 0
         else:
-            x_move = 1
+            x_move = 8
             y_move = 0
     else:
-        if np.sign(y_force) == -1:
+        if sign(y_force) == -1:
             x_move = 0
-            y_move = -1
+            y_move = -8
         else:
             x_move = 0
-            y_move = 1
+            y_move = 8
     return {"x":x_move, "y":y_move}
+
+    # if abs(x_force) > abs(y_force):
+    #     if np.sign(x_force) == -1:
+    #         x_move = -1
+    #         y_move = 0
+    #     else:
+    #         x_move = 1
+    #         y_move = 0
+    # else:
+    #     if np.sign(y_force) == -1:
+    #         x_move = 0
+    #         y_move = -1
+    #     else:
+    #         x_move = 0
+    #         y_move = 1
+    # return {"x":x_move, "y":y_move}
     
 
 def not_occupied(site, gnd, accepted_vdd, remaining_old_vdd):
