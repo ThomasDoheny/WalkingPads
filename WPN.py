@@ -90,9 +90,6 @@ def compute_forces(data):
 def sign(x):
     return -1 if x<0 else 1
 
-
-
-
 def distance_from_forces(data):
     # WP-N: move exactly 1 step in the dominant direction only
     x_force = data["x"]
@@ -167,12 +164,22 @@ def check_oscillation(history, window=6):
 sim_length = 1000
 legal_sites = read_legal_padfile("voltspot/example.vgrid.padloc")
 pad_history = []
+ir_history = []
+best_ir = float("inf")
+best_pads = None
 
 for i in range(sim_length):
     run_voltspot()
     grid = read_grid_ir("voltspot/steady.gridIR") #use this as input to find_neighbors_IR
     hotspot = get_hotspot(grid)
+    current_ir = hotspot[1]
     print(f"Iteration {i}, worst IR: {hotspot}")
+    
+    if current_ir < best_ir:
+        best_ir = current_ir
+        v_pads_check, _ = read_padfile("voltspot/pads.vgrid.padloc")
+        best_pads = v_pads_check[:]
+
     v_pads, g_pads = read_padfile("voltspot/pads.vgrid.padloc")
     new_v_pads = []
     moved = 0
@@ -205,7 +212,17 @@ for i in range(sim_length):
     print(f"Moved pads: {moved}")
     write_padfile("voltspot/pads.vgrid.padloc", new_v_pads, g_pads)
 
-    pad_history.append(tuple(new_v_pads))
-    if moved == 0 or check_oscillation(pad_history):
-        print("Converged (no movement or oscillation detected)")
+    ir_history.append(current_ir)
+    if moved == 0:
+        print("Converged (no movement)")
         break
+    # oscillation: IR hasn't improved in last 20 iterations
+    if len(ir_history) >= 100 and min(ir_history[-100:]) >= best_ir - 0.0001:
+        print(f"Converged (oscillating, best IR: {best_ir:.6f})")
+        break
+
+# write best result found during oscillation
+if best_pads:
+    _, g_pads = read_padfile("voltspot/pads.vgrid.padloc")
+    write_padfile("voltspot/pads.vgrid.padloc", best_pads, g_pads)
+    print(f"Best result written: {best_ir:.6f}")
