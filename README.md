@@ -101,7 +101,7 @@ cp voltspot/new_pads.vgrid.padloc voltspot/pads.vgrid.padloc
 
 ```bash
 cd voltspot
-./voltspot -f ../new_floorplan/alpha_ev6/ev6.flp -p ../new_floorplan/alpha_ev6/ev6_fixed.ptrace -c pdn.config -gridvol_file baseline.gridIR
+./voltspot -f ../new_floorplan/alpha_ev6/ev6.flp -p ../new_floorplan/alpha_ev6/ev6_fixed.ptrace -c ../new_floorplan/alpha_ev6/ev6.config -gridvol_file baseline.gridIR
 perl plot_onchipIR.pl baseline.gridIR
 mv baseline.gif ../baseline.gif
 cd ..

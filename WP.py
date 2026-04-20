@@ -6,6 +6,7 @@ import math
 # to be configured manyally
 FLOORPLAN = "../new_floorplan/alpha_ev6/ev6.flp"
 PTRACE = "../new_floorplan/alpha_ev6/ev6_fixed.ptrace"
+CONFIGURATION = "../new_floorplan/alpha_ev6/ev6.config"
 LEGAL_PADLOC = "voltspot/example.vgrid.padloc"
 PAD_LOCATIONS = "voltspot/pads.vgrid.padloc"
 
@@ -63,7 +64,7 @@ def run_voltspot():
         "./voltspot",
         "-f", FLOORPLAN,
         "-p", PTRACE,
-        "-c", "pdn.config",
+        "-c", CONFIGURATION,
         "-PDN_padconfig", "0",
         "-padloc_file_in", "pads.vgrid.padloc",
         "-gridvol_file", "steady.gridIR"
