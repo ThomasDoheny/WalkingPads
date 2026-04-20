@@ -80,3 +80,47 @@ display result.gif &
 - `WPN.py` — Walking Pads Neighbor variant
 - `WPR.py` — Walking Pads Refined variant
 - `SA.py` — Simulated Annealing optimizer
+
+
+## Usage if using ev6 floorplan
+
+### 0. Edit the WP.py file
+```python
+FLP    = "../new_floorplan/alpha_ev6/ev6.flp"
+PTRACE = "../new_floorplan/alpha_ev6/ev6_fixed.ptrace"
+```
+
+### 1. Generate a random pad placement (same as above)
+
+```bash
+python3 generator.py
+cp voltspot/new_pads.vgrid.padloc voltspot/pads.vgrid.padloc
+```
+
+### 2. Visualize the random baseline
+
+```bash
+cd voltspot
+./voltspot -f ../new_floorplan/alpha_ev6/ev6.flp -p ../new_floorplan/alpha_ev6/ev6_fixed.ptrace -c pdn.config -gridvol_file baseline.gridIR
+perl plot_onchipIR.pl baseline.gridIR
+mv baseline.gif ../baseline.gif
+cd ..
+display baseline.gif &
+```
+
+### 3. Run an algorithm (same as above)
+
+**Walking Pads (WP-F):**
+```bash
+python3 WP.py
+```
+
+### 4. Visualize result (same as above)
+
+```bash
+cd voltspot
+perl plot_onchipIR.pl steady.gridIR
+mv steady.gif ../result.gif
+cd ..
+display result.gif &
+```

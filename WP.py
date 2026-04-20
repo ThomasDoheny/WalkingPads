@@ -6,7 +6,7 @@ import math
 # to be configured manyally
 FLOORPLAN = "../new_floorplan/alpha_ev6/ev6.flp"
 PTRACE = "../new_floorplan/alpha_ev6/ev6_fixed.ptrace"
-LEGAL_PADLOC = "voltspot/ev6.vgrid.padloc"
+LEGAL_PADLOC = "voltspot/example.vgrid.padloc"
 PAD_LOCATIONS = "voltspot/pads.vgrid.padloc"
 
 def read_padfile(file): 
