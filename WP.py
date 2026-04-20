@@ -3,6 +3,12 @@
 import subprocess
 import math
 
+# to be configured manyally
+FLOORPLAN = "../new_floorplan/alpha_ev6/ev6.flp"
+PTRACE = "../new_floorplan/alpha_ev6/ev6_fixed.ptrace"
+LEGAL_PADLOC = "voltspot/ev6.vgrid.padloc"
+PAD_LOCATIONS = "voltspot/pads.vgrid.padloc"
+
 def read_padfile(file): 
     vdd = []
     gnd = []
@@ -55,9 +61,11 @@ def get_hotspot(grid):
 def run_voltspot():
     subprocess.run([
         "./voltspot",
-        "-f", "example.flp",
-        "-p", "example.ptrace",
+        "-f", FLOORPLAN,
+        "-p", PTRACE,
         "-c", "pdn.config",
+        "-PDN_padconfig", "0",
+        "-padloc_file_in", "pads.vgrid.padloc",
         "-gridvol_file", "steady.gridIR"
     ], cwd="voltspot")
 
@@ -197,13 +205,13 @@ def snap_to_legal_site(candidate, legal_sites, gnd, accepted_vdd, remaining_old_
 sim_length = 1000
 D = 100 #update each iteration
 freeze_rate = 0.99
-legal_sites = read_legal_padfile("voltspot/example.vgrid.padloc")
+legal_sites = read_legal_padfile(LEGAL_PADLOC)
 for i in range(sim_length):
     run_voltspot()
     grid = read_grid_ir("voltspot/steady.gridIR") #use this as input to find_neighbors_IR
     hotspot = get_hotspot(grid)
     print(f"Iteration {i}, worst IR: {hotspot}")
-    v_pads, g_pads = read_padfile("voltspot/pads.vgrid.padloc")
+    v_pads, g_pads = read_padfile(PAD_LOCATIONS)
     new_v_pads = []
     moved = 0
     for j in range(len(v_pads)):
@@ -233,7 +241,7 @@ for i in range(sim_length):
                 moved += 1
             
     print(f"Moved pads: {moved}")
-    write_padfile("voltspot/pads.vgrid.padloc", new_v_pads, g_pads)
+    write_padfile(PAD_LOCATIONS, new_v_pads, g_pads)
     print(f"D: {D}")
     D = D*freeze_rate
     if moved == 0:
