@@ -1,4 +1,5 @@
 import random
+import argparse
 
 def read_full_padfile(file):
     pads = []
@@ -107,10 +108,16 @@ def build_random_subset(full_file, out_file, keep_ratio=0.5, v_ratio=0.5, seed=4
     print(f"V pads: {len(vdd)}")
     print(f"G pads: {len(gnd)}")
 
-build_random_subset(
-    "voltspot/example.vgrid.padloc",
-    "voltspot/new_pads.vgrid.padloc",
-    keep_ratio=0.5,
-    v_ratio=0.5,
-    seed=42
-)
+if __name__ == "__main__":
+    # to be able to set legal_pad location and where the output is generated
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--legal_pad_location", default = "voltspot/example.vgrid.padloc")
+    parser.add_argument("--output_pad_location", default = "voltspot/new_pads.vgrid.padloc")
+    args = parser.parse_args()
+    build_random_subset(
+        args.legal_pad_location,
+        args.output_pad_location,
+        keep_ratio=0.5,
+        v_ratio=0.5,
+        seed=42
+    )
