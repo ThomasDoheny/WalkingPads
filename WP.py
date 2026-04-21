@@ -3,12 +3,21 @@
 import subprocess
 import math
 
-# to be configured manyally
-FLOORPLAN = "../new_floorplan/alpha_ev6/ev6.flp"
-PTRACE = "../new_floorplan/alpha_ev6/ev6_fixed.ptrace"
-CONFIGURATION = "../new_floorplan/alpha_ev6/ev6.config"
-LEGAL_PADLOC = "voltspot/example.vgrid.padloc"
+# # to be configured manyally
+# FLOORPLAN = "../new_floorplan/alpha_ev6/ev6.flp"
+# PTRACE = "../new_floorplan/alpha_ev6/ev6_fixed.ptrace"
+# CONFIGURATION = "../new_floorplan/alpha_ev6/ev6.config"
+# LEGAL_PADLOC = "voltspot/ev6.vgrid.padloc"
+# PAD_LOCATIONS = "voltspot/pads.vgrid.padloc"
+
+# GRID_MAX = 158 # it is 72 for the example chip and 158 for the ev6 chip
+
+FLOORPLAN     = "example.flp"
+PTRACE        = "example.ptrace"
+CONFIGURATION = "pdn.config"
+LEGAL_PADLOC  = "voltspot/example.vgrid.padloc"
 PAD_LOCATIONS = "voltspot/pads.vgrid.padloc"
+GRID_MAX      = 72
 
 def read_padfile(file): 
     vdd = []
@@ -76,7 +85,7 @@ def find_neighbors_IR(x, y, IR): #grid is 73 by 73
         left = center
     else:
         left = IR[(x-1, y)]
-    if (x == 72):
+    if (x == GRID_MAX):
         right = center
     else:
         right = IR[(x+1, y)]
@@ -84,7 +93,7 @@ def find_neighbors_IR(x, y, IR): #grid is 73 by 73
         bottom = center
     else:
         bottom = IR[(x, y-1)]
-    if (y == 72):
+    if (y == GRID_MAX):
         top = center
     else:
         top = IR[(x, y+1)]
@@ -100,7 +109,7 @@ def find_neighbors_IR(x, y, IR): #grid is 73 by 73
 
 #     if x == 71:
 #         right = 1
-#     elif x == 72:
+#     elif x == GRID_MAX:
 #         right = 0
 #     else:
 #         right = 2
@@ -114,7 +123,7 @@ def find_neighbors_IR(x, y, IR): #grid is 73 by 73
     
 #     if y == 71:
 #         top = 1
-#     elif y == 72:
+#     elif y == GRID_MAX:
 #         top = 0
 #     else:
 #         top = 2
@@ -131,7 +140,7 @@ def find_neighbors_IR(x, y, IR): #grid is 73 by 73
 
 #     if x == 71:
 #         right_IR = IR[(x+1, y)]
-#     elif x == 72:
+#     elif x == GRID_MAX:
 #         right_IR = center
 #     else: 
 #         right_IR = (IR[(x+1, y)] + IR[(x+1, y)]) / 2
@@ -145,7 +154,7 @@ def find_neighbors_IR(x, y, IR): #grid is 73 by 73
 
 #     if y == 71:
 #         top_IR = IR[(x, y+1)]
-#     elif y == 72:
+#     elif y == GRID_MAX:
 #         top_IR = center
 #     else: 
 #         top_IR = (IR[(x, y+1)] + IR[(x, y+2)]) / 2
@@ -222,10 +231,10 @@ for i in range(sim_length):
         distances = distance_from_forces(forces, D)
         x_pos = x_old + distances["x"]
         y_pos = y_old + distances["y"]
-        if(x_pos > 72):
-            x_pos = 72
-        if(y_pos > 72):
-            y_pos = 72
+        if(x_pos > GRID_MAX):
+            x_pos = GRID_MAX
+        if(y_pos > GRID_MAX):
+            y_pos = GRID_MAX
         if(x_pos < 0):
             x_pos = 0
         if(y_pos < 0):
