@@ -213,14 +213,15 @@ pdn_power_history = []
 sim_length = 1000
 D = 100 #update each iteration
 freeze_rate = 0.99
-legal_sites = read_legal_padfile("voltspot/example.vgrid.padloc")
-# legal_sites = read_legal_padfile("voltspot/legal_sites.vgrid.padloc")
+legal_sites = read_legal_padfile("voltspot/legal_sites.vgrid.padloc")
+prev_ir = float("inf")
 for i in range(sim_length):
     pdn_power = run_voltspot()
     pdn_power_history.append(pdn_power)
     grid = read_grid_ir("voltspot/steady.gridIR") #use this as input to find_neighbors_IR
     hotspot = get_hotspot(grid)
-    ir_history.append(hotspot[1])
+    current_ir = hotspot[1]
+    ir_history.append(current_ir)
     print(f"Iteration {i}, worst IR: {hotspot}")
     v_pads, g_pads = read_padfile("voltspot/pads.vgrid.padloc")
     new_v_pads = []
@@ -257,6 +258,11 @@ for i in range(sim_length):
     D = D*freeze_rate
     if moved == 0:
         break
+    if abs(prev_ir - current_ir) < 0.0001:
+        print(f"Converged (delta too small: {current_ir:.6f})")
+        break
+    prev_ir = current_ir
+
 old_vdd, old_gnd = read_padfile("voltspot/new_pads.vgrid.padloc")
 write_padfile("voltspot/pads.vgrid.padloc", old_vdd, old_gnd) #rewrite file with original pad placements
 plt.plot(ir_history)

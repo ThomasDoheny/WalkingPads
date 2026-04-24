@@ -116,7 +116,7 @@ moves_per_temp = 10
 max_dist       = 20
 # ────────────────────────────────────────────────────────────
 
-legal_sites = read_legal_padfile("voltspot/example.vgrid.padloc")
+legal_sites = read_legal_padfile("voltspot/legal_sites.vgrid.padloc")
 vdd, gnd = read_padfile("voltspot/pads.vgrid.padloc")
 gnd_set = set(gnd)
 
