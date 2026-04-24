@@ -108,7 +108,7 @@ def build_random_subset(full_file, out_file, keep_ratio=0.5, v_ratio=0.5, seed=4
     print(f"G pads: {len(gnd)}")
 
 build_random_subset(
-    "voltspot/example.vgrid.padloc",
+    "voltspot/legal_sites.vgrid.padloc",
     "voltspot/new_pads.vgrid.padloc",
     keep_ratio=0.5,
     v_ratio=0.5,

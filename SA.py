@@ -1,8 +1,11 @@
 # SA.py - Simulated Annealing pad placement
 
 import subprocess
+import re
 import math
 import random
+import matplotlib.pyplot as plt 
+import numpy as np
 
 def read_padfile(file):
     vdd = []
@@ -131,6 +134,10 @@ print_info(0, current_hotspot, 0, moves_per_temp, T_start, best_ir, info)
 T = T_start
 iteration = 0
 
+pdn_power_history = []
+ir_history = []
+
+
 while T > T_end:
     accepted = 0
     for _ in range(moves_per_temp):
@@ -157,6 +164,10 @@ while T > T_end:
         else:
             vdd[idx] = old_pad
 
+    match = re.search(r"PDN static power loss \(W\):\s*([0-9.]+)", stdout)
+    if match:
+        pdn_power_history.append(float(match.group(1)))
+    ir_history.append(new_ir)
     iteration += 1
     info = parse_voltspot_output(stdout)
     print_info(iteration, current_hotspot, accepted, moves_per_temp, T, best_ir, info)
@@ -164,3 +175,19 @@ while T > T_end:
 
 write_padfile("voltspot/pads.vgrid.padloc", best_vdd, gnd)
 print(f"\nDone. Best IR drop: {best_ir:.6f}")
+old_vdd, old_gnd = read_padfile("voltspot/new_pads.vgrid.padloc")
+write_padfile("voltspot/pads.vgrid.padloc", old_vdd, old_gnd) #rewrite file with original pad placements
+plt.plot(pdn_power_history)
+plt.yticks(np.arange(math.floor(min(pdn_power_history)), max(pdn_power_history), 0.05))
+plt.xlabel("Iteration")
+plt.ylabel("PDN Power Loss (W)")
+plt.title("PDN Power Loss convergence SA")
+plt.grid()
+plt.show()
+plt.plot(ir_history)
+plt.yticks(np.arange(math.floor(min(ir_history)), max(ir_history), 0.25))
+plt.xlabel("Iteration")
+plt.ylabel("Max IR drop")
+plt.title("IR Drop Convergense SA")
+plt.grid()
+plt.show()

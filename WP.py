@@ -1,7 +1,10 @@
 # WP-F: Walking Pads - Freezing algorithm
 
 import subprocess
+import re
 import math
+import matplotlib.pyplot as plt 
+import numpy as np
 
 def read_padfile(file): 
     vdd = []
@@ -38,6 +41,7 @@ def read_legal_padfile(file):
     return legal_sites
 
 
+
 def read_grid_ir(file):
     data = {}
     with open(file) as f:
@@ -53,13 +57,23 @@ def get_hotspot(grid):
 
   
 def run_voltspot():
-    subprocess.run([
+    result = subprocess.run([
         "./voltspot",
         "-f", "example.flp",
         "-p", "example.ptrace",
         "-c", "pdn.config",
         "-gridvol_file", "steady.gridIR"
-    ], cwd="voltspot")
+    ], cwd="voltspot",
+        capture_output=True,
+        text = True
+    )
+    print(result.stdout)
+
+    match = re.search(r"PDN static power loss \(W\):\s*([0-9.]+)", result.stdout)
+    if match: 
+        return float(match.group(1))
+    else:
+        return None
 
 def find_neighbors_IR(x, y, IR): #grid is 73 by 73
     center = IR[(x, y)]
@@ -193,15 +207,20 @@ def snap_to_legal_site(candidate, legal_sites, gnd, accepted_vdd, remaining_old_
     
 
 
+ir_history = []
+pdn_power_history = []
 
 sim_length = 1000
 D = 100 #update each iteration
 freeze_rate = 0.99
 legal_sites = read_legal_padfile("voltspot/example.vgrid.padloc")
+# legal_sites = read_legal_padfile("voltspot/legal_sites.vgrid.padloc")
 for i in range(sim_length):
-    run_voltspot()
+    pdn_power = run_voltspot()
+    pdn_power_history.append(pdn_power)
     grid = read_grid_ir("voltspot/steady.gridIR") #use this as input to find_neighbors_IR
     hotspot = get_hotspot(grid)
+    ir_history.append(hotspot[1])
     print(f"Iteration {i}, worst IR: {hotspot}")
     v_pads, g_pads = read_padfile("voltspot/pads.vgrid.padloc")
     new_v_pads = []
@@ -238,5 +257,20 @@ for i in range(sim_length):
     D = D*freeze_rate
     if moved == 0:
         break
-    # if D < 1:
-    #     break
+old_vdd, old_gnd = read_padfile("voltspot/new_pads.vgrid.padloc")
+write_padfile("voltspot/pads.vgrid.padloc", old_vdd, old_gnd) #rewrite file with original pad placements
+plt.plot(ir_history)
+plt.yticks(np.arange(math.floor(min(ir_history)), max(ir_history), 0.25))
+plt.xlabel("Iteration")
+plt.ylabel("Max IR drop")
+plt.title("IR Drop Convergence WP-F (Freezing Rate = 0.99)")
+plt.grid()
+plt.show()
+plt.plot(pdn_power_history)
+plt.yticks(np.arange(math.floor(min(pdn_power_history)), max(pdn_power_history), 0.05))
+plt.xlabel("Iteration")
+plt.ylabel("PDN Power Loss (W)")
+plt.title("PDN Power Loss convergence WP-F (Freezing Rate = 0.99)")
+plt.grid()
+plt.show()
+
